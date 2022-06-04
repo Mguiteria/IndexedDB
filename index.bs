@@ -445,7 +445,7 @@ which is either null or an [=/upgrade transaction=], and is initially null.
 ### Database storage ### {#database-storage}
 <!-- ============================================================ -->
 
-Indexed DB is a [=/storage endpoint=], with the [=/storage identifier=] <code>"indexedDB</code>.
+Indexed DB is a [=/storage endpoint=], with the [=/storage identifier=] <code>"indexedDB"</code>.
 
 A <dfn>pumpkin</dfn> is a [=/struct=] consisting of a <dfn for="pumpkin">queue</dfn> (a [=/connection queue=]) and a <dfn for="pumpkin">database</dfn> (a [=/database=]).
 
