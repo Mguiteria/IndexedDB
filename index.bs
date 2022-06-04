@@ -65,12 +65,7 @@ spec: ecma262; urlPrefix: https://tc39.github.io/ecma262/
 spec: storage; urlPrefix: https://storage.spec.whatwg.org/
     type: dfn
         text: storage identifier; url: storage-identifier
-        text: storage bottle; url: storage-bottle
-        for: storage bottle; text: map; url: storage-bottle-map
         text: storage bucket; url: storage-bucket
-        text: storage proxy map; url: storage-proxy-map
-        for: storage proxy map; text: backing map; url: storage-proxy-map-backing-map
-        text: obtain a local storage bottle map; url: obtain-a-local-storage-bottle-map
 </pre>
 
 <style>
@@ -422,26 +417,26 @@ To <dfn>create a sorted name list</dfn> from a [=/list=] |names|, run these step
 ## Database ## {#database-construct}
 <!-- ============================================================ -->
 
-Each [=/origin=] has an associated set of [=databases=]. A
+Each [=/origin=] has an associated set of [=/databases=]. A
 <dfn>database</dfn> has zero or more [=/object stores=] which
 hold the data stored in the database.
 
 <div dfn-for=database>
 
-A [=database=] has a <dfn>name</dfn> which identifies it within a
+A [=/database=] has a <dfn>name</dfn> which identifies it within a
 specific [=/origin=]. The name is a [=/name=],
 and stays constant for the lifetime of the database.
 
-A [=database=] has a <dfn>version</dfn>. When a database is first
+A [=/database=] has a <dfn>version</dfn>. When a database is first
 created, its [=database/version=] is 0 (zero).
 
 <aside class=note>
-  Each [=database=] has one version at a time; a [=database=] can't
+  Each [=/database=] has one version at a time; a [=/database=] can't
   exist in multiple versions at once. The only way to change the
   version is using an [=/upgrade transaction=].
 </aside>
 
-A [=database=] has at most one associated <dfn>upgrade transaction</dfn>,
+A [=/database=] has at most one associated <dfn>upgrade transaction</dfn>,
 which is either null or an [=/upgrade transaction=], and is initially null.
 
 </div>
@@ -450,24 +445,28 @@ which is either null or an [=/upgrade transaction=], and is initially null.
 ### Database storage ### {#database-storage}
 <!-- ============================================================ -->
 
-Indexed DB is a [=/storage endpoint=], with the [=/storage identifier=] <code>"indexedDB</code>. The storage for a [=/database=] is contained within a [=/storage bottle=]. The [=/database=]'s [=database/name=] is the [=map/key=] in the [=/storage bottle=]'s [=storage bottle/map=].
+Indexed DB is a [=/storage endpoint=], with the [=/storage identifier=] <code>"indexedDB</code>.
+
+A <dfn>pumpkin</dfn> is a [=/struct=] consisting of a <dfn for="pumpkin">queue</dfn> (a [=/connection queue=]) and a <dfn for="pumpkin">database</dfn> (a [=/database=]).
+
+A <dfn>new pumpkin</dfn> is a [=/pumpkin=] whose [=pumpkin/queue=] is an empty [=/connection queue=], and whose [=pumpkin/database=] is null.
 
 
 <!-- ============================================================ -->
 ### Database connection ### {#database-connection}
 <!-- ============================================================ -->
 
-Script does not interact with [=databases=] directly. Instead,
+Script does not interact with [=/databases=] directly. Instead,
 script has indirect access via a <dfn lt="connection|connected">connection</dfn>.
 A [=/connection=] object can be used to manipulate the objects of
-that [=database=]. It is also the only way to obtain a
-[=/transaction=] for that [=database=].
+that [=/database=]. It is also the only way to obtain a
+[=/transaction=] for that [=/database=].
 
-The act of opening a [=database=] creates a [=/connection=].
-There may be multiple [=/connections=] to a given [=database=] at
+The act of opening a [=/database=] creates a [=/connection=].
+There may be multiple [=/connections=] to a given [=/database=] at
 any given time.
 
-A [=/connection=] can only access [=databases=] associated with the
+A [=/connection=] can only access [=/databases=] associated with the
 [=/origin=] of the global scope from which the [=/connection=] is
 opened.
 
@@ -482,7 +481,7 @@ A [=/connection=] has a <dfn>version</dfn>, which is set when
 the [=/connection=] is created. It remains constant for the
 lifetime of the [=/connection=] unless an <a data-lt="abort
 an upgrade transaction">upgrade is aborted</a>, in which
-case it is set to the previous version of the [=database=]. Once
+case it is set to the previous version of the [=/database=]. Once
 the [=/connection=] is closed the
 [=connection/version=] does not change.
 
@@ -506,7 +505,7 @@ connection=] with the [=/connection=] and with the <var ignore>forced flag</var>
 
 A [=/connection=] has an <dfn>object store set</dfn>, which is
 initialized to the set of [=/object stores=] in the associated
-[=database=] when the [=/connection=] is created. The contents of the
+[=/database=] when the [=/connection=] is created. The contents of the
 set will remain constant except when an [=/upgrade transaction=] is
 running.
 
@@ -515,7 +514,7 @@ null.
 
 An event with type <dfn event>`versionchange`</dfn> will be fired at an open
 [=/connection=] if an attempt is made to upgrade or delete the
-[=database=]. This gives the [=/connection=] the opportunity to close
+[=/database=]. This gives the [=/connection=] the opportunity to close
 to allow the upgrade or delete to proceed.
 
 An event with type <dfn event>`close`</dfn> will be fired at a [=/connection=] if the connection is [=/close a database connection|closed=] abormally.
@@ -528,7 +527,7 @@ An event with type <dfn event>`close`</dfn> will be fired at a [=/connection=] i
 <!-- ============================================================ -->
 
 An <dfn>object store</dfn> is the primary storage mechanism for
-storing data in a [=database=].
+storing data in a [=/database=].
 
 <div dfn-for=object-store>
 
@@ -545,7 +544,7 @@ store with the same key.
 
 An [=/object store=] has a <dfn>name</dfn>, which is a [=/name=].
 At any one time, the name is unique
-within the [=database=] to which it belongs.
+within the [=/database=] to which it belongs.
 
 An [=/object store=] optionally has a <dfn>key path</dfn>. If the
 object store has a key path it is said to use <dfn>in-line keys</dfn>.
@@ -909,7 +908,7 @@ an [=/upgrade transaction=] is running.
 <!-- ============================================================ -->
 
 A <dfn id=transaction-concept>transaction</dfn> is used to interact
-with the data in a [=database=]. Whenever data is read or written
+with the data in a [=/database=]. Whenever data is read or written
 to the database it is done by using a [=/transaction=].
 
 <div dfn-for=transaction>
@@ -1087,7 +1086,7 @@ The <dfn>lifetime</dfn> of a
     failed request that is not handled by script.
 
     When a transaction is aborted the implementation must undo (roll
-    back) any changes that were made to the [=database=] during that
+    back) any changes that were made to the [=/database=] during that
     transaction. This includes both changes to the contents of
     [=/object stores=] as well as additions and removals of [=/object
     stores=] and [=/indexes=].
@@ -1104,7 +1103,7 @@ The <dfn>lifetime</dfn> of a
 
     When committing, the transaction [=transaction/state=] is set to
     [=transaction/committing=]. The implementation must atomically
-    write any changes to the [=database=] made by requests placed
+    write any changes to the [=/database=] made by requests placed
     against the transaction. That is, either all of the changes must
     be written, or if an error occurs, such as a disk write error, the
     implementation must not write any of the changes to the database,
@@ -1177,7 +1176,7 @@ Implementations may impose additional constraints. For example, implementations 
 
   * Any number of [=read-only transactions=] are allowed to run concurrently, even if they have [=overlapping scopes=].
   * As long as a [=read-only transaction=] is running, the data that the implementation returns through [=/requests=] created with that transaction remains constant. That is, two requests to read the same piece of data yield the same result both for the case when data is found and the result is that data, and for the case when data is not found and a lack of data is indicated.
-  * A <a>read/write transaction</a> is only affected by changes to [=/object stores=] that are made using the transaction itself. The implementation ensures that another transaction does not modify the contents of [=/object stores=] in the <a>read/write transaction</a>'s [=transaction/scope=]. The implementation also ensures that if the <a>read/write transaction</a> completes successfully, the changes written to [=/object stores=] using the transaction can be committed to the [=database=] without merge conflicts.
+  * A <a>read/write transaction</a> is only affected by changes to [=/object stores=] that are made using the transaction itself. The implementation ensures that another transaction does not modify the contents of [=/object stores=] in the <a>read/write transaction</a>'s [=transaction/scope=]. The implementation also ensures that if the <a>read/write transaction</a> completes successfully, the changes written to [=/object stores=] using the transaction can be committed to the [=/database=] without merge conflicts.
   * If multiple <a>read/write transactions</a> are attempting to access the same object store (i.e. if they have [=overlapping scopes=]), the transaction that was [=transaction/created=] first is the transaction which gets access to the object store first, and it is the only transaction which has access to the object store until the transaction is [=transaction/finished=].
   * Any transaction [=transaction/created=] after a <a>read/write transaction</a> sees the changes written by the <a>read/write transaction</a>. For example, if a <a>read/write transaction</a> A, is created, and later another transaction B, is created, and the two transactions have [=overlapping scopes=], then transaction B sees any changes made to any [=/object stores=] that are part of that [=overlapping scope=]. This also means that transaction B does not have access to any [=/object stores=] in that overlapping [=transaction/scope=] until transaction A is [=transaction/finished=].
 
@@ -1230,7 +1229,7 @@ handler.
 ## Requests ## {#request-construct}
 <!-- ============================================================ -->
 
-Each asynchronous operation on a [=database=] is done using a <dfn>request</dfn>. Every request represents one
+Each asynchronous operation on a [=/database=] is done using a <dfn>request</dfn>. Every request represents one
 operation.
 
 <div dfn-for=request>
@@ -1282,7 +1281,7 @@ A [=/request=]'s [=get the parent=] algorithm returns the request's
 <!-- ============================================================ -->
 
 An <dfn>open request</dfn> is a special type of [=/request=] used
-when opening a [=/connection=] or deleting a [=database=].
+when opening a [=/connection=] or deleting a [=/database=].
 In addition to <a event>`success`</a> and <a event>`error`</a> events,
 <dfn event>`blocked`</dfn> and <dfn event>`upgradeneeded`</dfn> events may be fired at an [=open
 request=] to indicate progress.
@@ -1295,28 +1294,29 @@ unless an <a event>`upgradeneeded`</a> event has been fired.
 
 An [=open request=]'s [=get the parent=] algorithm returns null.
 
+</div>
+
+<!-- ============================================================ -->
+### Connection queues ### {#connection-queues}
+<!-- ============================================================ -->
+
 [=Open requests=] are processed in a <dfn>connection queue</dfn>.
-The queue contains all [=open requests=] associated with a
-[=/storage bottle=] and a [=database/name=]. Requests added to the
-[=connection queue=] processed in order and each request must run
+The queue contains all [=open requests=] associated with
+a [=database/name=]. Requests added to the
+[=/connection queue=] processed in order and each request must run
 to completion before the next request is processed. An open request
 may be blocked on other [=/connections=], requiring those
 connections to [=connection/close=] before the request can complete and allow
 further requests to be processed.
 
-Issue: Make the queue/bottle (or bottle map) association more rigorous.
-
-
 <aside class=note>
-  A [=connection queue=] is not a [=task queue=] associated with
+  A [=/connection queue=] is not a [=task queue=] associated with
   an [=/event loop=], as the requests are processed outside any
   specific [=/browsing context=]. The delivery of events to
   completed [=open request=] still goes through a [=task queue=]
   associated with the [=/event loop=] of the context where the
   request was made.
 </aside>
-
-</div>
 
 <!-- ============================================================ -->
 ## Key range ## {#range-construct}
@@ -1965,17 +1965,17 @@ The <span>task source</span> for these tasks is the <dfn id=database-access-task
 <!-- ============================================================ -->
 
 The {{IDBRequest}} interface provides the means to access results of
-asynchronous requests to [=databases=] and [=database=] objects using
+asynchronous requests to [=/databases=] and [=/database=] objects using
 [=event handler IDL attributes=] [[!HTML]].
 
 Every method for making asynchronous requests returns an
 {{IDBRequest}} object that communicates back to the requesting
 application through events. This design means that any number of
-requests can be active on any [=database=] at a time.
+requests can be active on any [=/database=] at a time.
 
 <aside class=example id=example-async-requests>
 
-In the following example, we open a [=database=] asynchronously.
+In the following example, we open a [=/database=] asynchronously.
 Various event handlers are registered for responding to various
 situations.
 
@@ -2145,7 +2145,7 @@ Events are constructed as defined in [[DOM#constructing-events]].
 ## The {{IDBFactory}} interface ## {#factory-interface}
 <!-- ============================================================ -->
 
-[=Database=] objects are accessed through methods on the
+[=/database=] objects are accessed through methods on the
 {{IDBFactory}} interface. A single object implementing this
 interface is present in the global scope of environments that support
 Indexed DB operations.
@@ -2246,11 +2246,11 @@ The <dfn method for=IDBFactory>open(|name|, |version|)</dfn> method steps are:
 
         <details class=note>
           <summary>What happens if |version| is not given?</summary>
-          If |version| is not given and a [=database=]
+          If |version| is not given and a [=/database=]
           with that name already exists, a connection will be opened
           without changing the [=database/version=]. If
-          |version| is not given and no [=database=] with
-          that name exists, a new [=database=] will be created with
+          |version| is not given and no [=/database=] with
+          that name exists, a new [=/database=] will be created with
           [=database/version=] equal to 1.
         </details>
 
@@ -2416,7 +2416,7 @@ The <dfn method for=IDBFactory>cmp(|first|, |second|)</dfn> method steps are:
 <!-- ============================================================ -->
 
 The {{IDBDatabase}}
-interface represents a [=/connection=] to a [=database=].
+interface represents a [=/connection=] to a [=/database=].
 
 An {{IDBDatabase}} object must not be garbage collected if its
 associated [=/connection=]'s [=close pending flag=] is false and it
@@ -2470,7 +2470,7 @@ dictionary IDBObjectStoreParameters {
 </div>
 
 The <dfn attribute for=IDBDatabase>name</dfn> getter steps are to
-return [=/this=]'s associated [=database=]'s [=database/name=].
+return [=/this=]'s associated [=/database=]'s [=database/name=].
 
 <aside class=note>
 The {{IDBDatabase/name}} attribute returns this name even if
@@ -2487,7 +2487,7 @@ return [=/this=]'s [=connection/version=].
     Is this the same as the [=/database=]'s [=database/version=]?
   </summary>
   As long as the [=/connection=] is open, this is the same as the
-  connected [=database=]'s [=database/version=]. But once the
+  connected [=/database=]'s [=database/version=]. But once the
   [=/connection=] has [=connection/closed=], this attribute will not
   reflect changes made with a later [=/upgrade transaction=].
 </details>
@@ -2526,11 +2526,11 @@ The <dfn attribute for=IDBDatabase>objectStoreNames</dfn> getter steps are:
 
 <details class=note>
   <summary>
-    Is this the same as the [=database=]'s [=/object store=]
+    Is this the same as the [=/database=]'s [=/object store=]
     [=object-store/names=]?
   </summary>
   As long as the [=/connection=] is open, this is the same as the
-  connected [=database=]'s [=/object store=] [=object-store/names=].
+  connected [=/database=]'s [=/object store=] [=object-store/names=].
   But once the [=/connection=] has [=connection/closed=], this attribute
   will not reflect changes made with a later [=/upgrade transaction=].
 </details>
@@ -2540,7 +2540,7 @@ The <dfn attribute for=IDBDatabase>objectStoreNames</dfn> getter steps are:
 
 The <dfn method for=IDBDatabase>createObjectStore(|name|, |options|)</dfn> method steps are:
 
-1. Let |database| be [=/this=]'s associated [=database=].
+1. Let |database| be [=/this=]'s associated [=/database=].
 
 1. Let |transaction| be |database|'s [=database/upgrade transaction=]
     if it is not null, or [=throw=] an "{{InvalidStateError}}"
@@ -2579,7 +2579,7 @@ The <dfn method for=IDBDatabase>createObjectStore(|name|, |options|)</dfn> metho
 </div>
 
 This method creates and returns a new [=/object store=] with the given
-name in the [=connected=] [=database=]. Note that this method must
+name in the [=connected=] [=/database=]. Note that this method must
 only be called from within an [=/upgrade transaction=].
 
 This method synchronously modifies the
@@ -2605,7 +2605,7 @@ error.
 
 The <dfn method for=IDBDatabase>deleteObjectStore(|name|)</dfn> method steps are:
 
-1. Let |database| be [=/this=]'s associated [=database=].
+1. Let |database| be [=/this=]'s associated [=/database=].
 
 1. Let |transaction| be |database|'s [=database/upgrade transaction=]
     if it is not null, or [=throw=] an "{{InvalidStateError}}"
@@ -2629,7 +2629,7 @@ The <dfn method for=IDBDatabase>deleteObjectStore(|name|)</dfn> method steps are
 </div>
 
 This method destroys the [=/object store=] with the given name in the
-[=connected=] [=database=]. Note that this method must only be called
+[=connected=] [=/database=]. Note that this method must only be called
 from within an [=/upgrade transaction=].
 
 This method synchronously modifies the
@@ -2670,7 +2670,7 @@ The <dfn method for=IDBDatabase>transaction(|storeNames|, |mode|, |options|)</df
     otherwise.
 
 1. If any string in |scope| is not the name of an [=/object
-    store=] in the [=connected=] [=database=], [=throw=] a
+    store=] in the [=connected=] [=/database=], [=throw=] a
     "{{NotFoundError}}" {{DOMException}}.
 
 1. If |scope| is empty, [=throw=] an "{{InvalidAccessError}}" {{DOMException}}.
@@ -2837,7 +2837,7 @@ The {{IDBObjectStore/name}} setter steps are:
     terminate these steps.
 
 1. If an [=/object store=] [=object-store/named=]
-    |name| already exists in |store|'s [=database=], [=throw=] a
+    |name| already exists in |store|'s [=/database=], [=throw=] a
     "{{ConstraintError}}" {{DOMException}}.
 
 1. Set |store|'s [=object-store/name=] to |name|.
@@ -4768,7 +4768,7 @@ enum IDBTransactionMode {
     ::
         Returns a list of the names of [=/object stores=] in the
         transaction's [=transaction/scope=]. For an [=/upgrade transaction=]
-        this is all object stores in the [=database=].
+        this is all object stores in the [=/database=].
 
     : |transaction| . {{IDBTransaction/mode}}
     ::
@@ -4964,22 +4964,24 @@ The <dfn attribute for=IDBTransaction>onerror</dfn> attribute is an [=/event han
 
 <div algorithm>
 
-To <dfn>open a database</dfn> with [=/storage proxy map=] |map|, a database |name|, a database |version|, and a |request|, run these steps:
+To <dfn>open a database</dfn> with |map|, a database |name|, a database |version|, and a |request|, run these steps:
 
-1. Let |queue| be the [=connection queue=] for |map|'s [=storage proxy map/backing map=] and |name|.
+1. If |map|\[|name|] does not exist, set |map|\[|name|] to a [=/new pumpkin=].
+
+1. Let |queue| be |map|\[|name|]'s [=pumpkin/queue=].
 
 1. Add |request| to |queue|.
 
 1. Wait until all previous requests in |queue| have been processed.
 
-1. Let |db| be |map|\[|name|] if it [=map/exists=], or null otherwise.
+1. Let |db| be |map|\[|name|]'s [=pumpkin/database=].
 
 1. If |version| is undefined, let |version| be 1 if |db| is null, or
     |db|'s [=database/version=] otherwise.
 
-1. If |db| is null, let |db| be a new [=database=] with
+1. If |db| is null, let |db| be a new [=/database=] with
     [=database/name=] |name|, [=database/version=] 0 (zero), and with
-    no [=/object stores=], and [=map/set=] |map|\[|name|] to |db|. If this fails for any reason, return an
+    no [=/object stores=], and [=map/set=] |map|\[|name|]'s [=pumpkin/database=] to |db|. If this fails for any reason, return an
     appropriate error (e.g. a "{{QuotaExceededError}}" or
     "{{UnknownError}}" {{DOMException}}).
 
@@ -5078,7 +5080,7 @@ optional |forced flag|, run these steps:
   [=run an upgrade transaction=], and the steps to [=delete a
   database=], which [both](#delete-close-block)
   [wait](#version-change-close-block) for [=/connections=] to
-  a given [=database=] to be closed before continuing.
+  a given [=/database=] to be closed before continuing.
 </aside>
 
 
@@ -5088,17 +5090,19 @@ optional |forced flag|, run these steps:
 
 <div algorithm>
 
-To <dfn>delete a database</dfn> with [=/storage proxy map=] |map|, a database |name|, and a |request|, run these steps:
+To <dfn>delete a database</dfn> with |map|, a database |name|, and a |request|, run these steps:
 
-1. Let |queue| be the [=connection queue=] for |map|'s [=storage proxy map/backing map=] and |name|.
+1. If |map|\[|name|] does not exist, set |map|\[|name|] to a [=/new pumpkin=].
+
+1. Let |queue| be |map|\[|name|]'s [=pumpkin/queue=].
 
 1. Add |request| to |queue|.
 
 1. Wait until all previous requests in |queue| have been processed.
 
-1. If |map|\[|name|] does not [=map/exist=], then return 0 (zero).
+1. If |map|\[|name|]'s [=pumpkin/database=] is null, then return 0 (zero).
 
-1. Otherwise, let |db| be |map|\[|name|].
+1. Otherwise, let |db| be |map|\[|name|]'s [=pumpkin/database=].
 
 1. Let |openConnections| be the [=/set=] of all [=/connections=]
     associated with |db|.
@@ -5128,7 +5132,7 @@ To <dfn>delete a database</dfn> with [=/storage proxy map=] |map|, a database |n
 
 1. Let |version| be |db|'s [=database/version=].
 
-1. [=map/Remove=] |map|\[|name|]. If this fails for any reason, return an appropriate
+1. Set |map|\[|name|]'s [=pumpkin/database=] to null. If this fails for any reason, return an appropriate
     error (e.g. "{{QuotaExceededError}}" or "{{UnknownError}}" {{DOMException}}).
 
 1. Return |version|.
@@ -5154,9 +5158,9 @@ To <dfn>commit a transaction</dfn> with the |transaction| to commit, run these s
     1. If |transaction|'s [=transaction/state=] is no longer [=transaction/committing=],
         then terminate these steps.
 
-    1. Attempt to write any outstanding changes made by |transaction| to the [=database=], considering |transaction|'s [=transaction/durability hint=].
+    1. Attempt to write any outstanding changes made by |transaction| to the [=/database=], considering |transaction|'s [=transaction/durability hint=].
 
-    1. If an error occurs while writing the changes to the [=database=],
+    1. If an error occurs while writing the changes to the [=/database=],
         then run [=abort a transaction=] with |transaction| and an
         appropriate type for the error, for example "{{QuotaExceededError}}" or
         "{{UnknownError}}" {{DOMException}}, and terminate these steps.
@@ -5193,7 +5197,7 @@ To <dfn>commit a transaction</dfn> with the |transaction| to commit, run these s
 
 To <dfn>abort a transaction</dfn> with the |transaction| to abort, and |error|, run these steps:
 
-1. All the changes made to the [=database=] by the [=/transaction=]
+1. All the changes made to the [=/database=] by the [=/transaction=]
     are reverted. For [=/upgrade transactions=] this includes changes
     to the set of [=/object stores=] and [=/indexes=], as well as the
     change to the [=database/version=]. Any [=/object stores=] and
@@ -5325,10 +5329,10 @@ created [=/request=] belongs to is [=transaction/aborted=] using the steps to
 <div algorithm>
 
 To <dfn>run an upgrade transaction</dfn> with |connection| (a [=/connection=])
-which is used to update the [=database=], a new |version| to be set
-for the [=database=], and a |request|, run these steps:
+which is used to update the [=/database=], a new |version| to be set
+for the [=/database=], and a |request|, run these steps:
 
-1. Let |db| be |connection|'s [=database=].
+1. Let |db| be |connection|'s [=/database=].
 
 1. Let |transaction| be a new [=/upgrade transaction=] with
     |connection| used as [=/connection=].
@@ -5344,7 +5348,7 @@ for the [=database=], and a |request|, run these steps:
     <aside class=note>
       Note that until this [=/transaction=] is finished, no
       other [=/connections=] can be opened to the same
-      [=database=].
+      [=/database=].
     </aside>
 
 1. Let |old version| be |db|'s [=database/version=].
@@ -5391,14 +5395,14 @@ To <dfn>abort an upgrade transaction</dfn> with |transaction|, run these steps:
 
 <aside class=note>
   These steps are run as needed by the steps to [=abort a
-  transaction=], which revert changes to the [=database=] including
+  transaction=], which revert changes to the [=/database=] including
   the set of associated [=/object stores=] and [=/indexes=], as well
   as the change to the [=database/version=].
 </aside>
 
 1. Let |connection| be |transaction|'s [=/connection=].
 
-1. Let |database| be |connection|'s [=database=].
+1. Let |database| be |connection|'s [=/database=].
 
 1. Set |connection|'s [=connection/version=] to |database|'s
     [=database/version=] if |database| previously existed, or 0 (zero)
@@ -5472,7 +5476,7 @@ To <dfn>abort an upgrade transaction</dfn> with |transaction|, run these steps:
 <aside class=note>
   The {{IDBDatabase/name}} property of the {{IDBDatabase}} instance is
   not modified, even if the aborted [=/upgrade transaction=] was
-  creating a new [=database=].
+  creating a new [=/database=].
 </aside>
 
 
@@ -5600,7 +5604,7 @@ To <dfn>fire an error event</dfn> at a |request|, run these steps:
 <!-- ============================================================ -->
 
 This section describes various operations done on the data in
-[=/object stores=] and [=/indexes=] in a [=database=].
+[=/object stores=] and [=/indexes=] in a [=/database=].
 These operations are run by the steps to [=asynchronously execute
 a request=].
 
@@ -6803,7 +6807,7 @@ For the revision history of the second edition, see [that document's Revision Hi
 * Specified [[#transaction-scheduling]] more precisely and disallow starting read/write transactions while read-only transactions with overlapping scope are running. ([Issue #253](https://github.com/w3c/IndexedDB/issues/253))
 * Added <a href="#accessibility">Accessibility considerations</a> section. ([Issue #327](https://github.com/w3c/IndexedDB/issues/327))
 * Used [[infra]]'s list sorting definition. ([Issue #346](https://github.com/w3c/IndexedDB/issues/346))
-* Defined [=database=] storage in terms of [[Storage]] primitives.
+* Defined [=/database=] storage in terms of [[Storage]] primitives.
 
 <!-- ============================================================ -->
 # Acknowledgements # {#acknowledgements}
